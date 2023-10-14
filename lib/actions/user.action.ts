@@ -122,3 +122,29 @@ export async function fetchUsers({
     throw new Error(`Failed to fecth users: ${error.message}`);
   }
 }
+
+export async function getActivity(userId: string) {
+  try {
+    connectToDB();
+
+    //Find all threads created by the user
+    const userThreads = await Thread.find({ author: userId });
+
+    //COllect all the child threads ids(replies) from the 'children
+    const childThreadsIds = userThreads.reduce((acc, userThread) => {
+      return acc.concat(userThread.children);
+    }, []);
+
+    const replies = await Thread.find({
+      _id: { $in: childThreadsIds },
+      author: { $ne: userId },
+    }).populate({
+      path: "author",
+      model: User,
+      select: "name image id",
+    });
+    return replies;
+  } catch (error: any) {
+    throw new Error(`Failed to fecth activity: ${error.message}`);
+  }
+}

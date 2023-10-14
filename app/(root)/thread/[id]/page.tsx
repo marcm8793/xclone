@@ -1,11 +1,13 @@
-import ThreadCard from "@/components/cards/ThreadCard";
-import Comment from "@/components/forms/Comment";
-import { fetchThreadById } from "@/lib/actions/thread.action";
-import { fetchUser } from "@/lib/actions/user.action";
-import { currentUser } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { currentUser } from "@clerk/nextjs";
+import Comment from "@/components/forms/Comment";
+import ThreadCard from "@/components/cards/ThreadCard";
+import { fetchUser } from "@/lib/actions/user.action";
+import { fetchThreadById } from "@/lib/actions/thread.action";
 
-const Page = async ({ params }: { params: { id: string } }) => {
+export const revalidate = 0;
+
+async function page({ params }: { params: { id: string } }) {
   if (!params.id) return null;
 
   const user = await currentUser();
@@ -20,10 +22,9 @@ const Page = async ({ params }: { params: { id: string } }) => {
     <section className="relative">
       <div>
         <ThreadCard
-          key={thread._id}
           id={thread._id}
           currentUserId={user?.id || ""}
-          parentId={thread.parrentId}
+          parentId={thread.parentId}
           content={thread.text}
           author={thread.author}
           community={thread.community}
@@ -32,7 +33,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
         />
       </div>
 
-      <div className="mt7">
+      <div className="mt-7">
         <Comment
           threadId={thread.id}
           currentUserImg={userInfo.image}
@@ -46,7 +47,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
             key={childItem._id}
             id={childItem._id}
             currentUserId={user?.id || ""}
-            parentId={childItem.parrentId}
+            parentId={childItem.parentId}
             content={childItem.text}
             author={childItem.author}
             community={childItem.community}
@@ -58,6 +59,6 @@ const Page = async ({ params }: { params: { id: string } }) => {
       </div>
     </section>
   );
-};
+}
 
-export default Page;
+export default page;
